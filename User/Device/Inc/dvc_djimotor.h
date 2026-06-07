@@ -459,7 +459,7 @@ protected:
     //一圈编码器刻度
     uint16_t Encoder_Num_Per_Round = 8192;
     //最大输出扭矩
-    uint16_t Output_Max = 11000;
+    uint16_t Output_Max = 8000;
 
     //内部变量
 

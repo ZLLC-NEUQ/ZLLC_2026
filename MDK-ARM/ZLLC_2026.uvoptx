@@ -219,6 +219,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>smax</ItemText>
         </Ww>
+        <Ww>
+          <count>14</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>testtheta</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>

@@ -137,6 +137,7 @@ public:
     inline float Get_Target_Omega();
     inline float Get_Spin_Omega();
     inline float Get_Relative_Angle();
+    float Get_Chassis_Power_MAX();
 
     inline void Set_Chassis_Control_Type(Enum_Chassis_Control_Type __Chassis_Control_Type);
     inline void Set_Target_Velocity_X(float __Target_Velocity_X);
@@ -157,15 +158,15 @@ protected:
     //初始化相关常量
 
     //速度X限制
-    float Velocity_X_Max=4.0f;
+    float Velocity_X_Max=20.0f;
     //速度Y限制
-    float Velocity_Y_Max=4.0f;
+    float Velocity_Y_Max=20.0f;
     //角速度限制
     float Omega_Max = 4.0f;
     //舵向电机功率上限比率
     float Steer_Power_Ratio = 0.5f;
     //底盘小陀螺模式角速度
-    float Spin_Omega = 8.0f;
+    float Spin_Omega = 20.0f;
     //常量
 
 
@@ -382,6 +383,7 @@ float Class_Steering_Wheel_Chassis::Get_Relative_Angle()
 {
     return (Relative_Angle);
 }
+
 /**
  * @brief 设定底盘控制方法
  *

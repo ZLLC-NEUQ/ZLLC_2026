@@ -67,50 +67,54 @@ volatile uint8_t referee_dma_busy = 0;
 
 static inline uint8_t Referee_DMA_QueueFull(void)
 {
-    return referee_dma_count >= REFEREE_DMA_TX_QUEUE_DEPTH;
+	return referee_dma_count >= REFEREE_DMA_TX_QUEUE_DEPTH;
 }
 
 static inline uint8_t Referee_DMA_QueueEmpty(void)
 {
-    return referee_dma_count == 0;
+	return referee_dma_count == 0;
 }
 
 static void Referee_DMA_Dequeue(void)
 {
-    if (Referee_DMA_QueueEmpty()) {
-        return;
-    }
-    referee_dma_head = (referee_dma_head + 1) % REFEREE_DMA_TX_QUEUE_DEPTH;
-    referee_dma_count--;
+	if (Referee_DMA_QueueEmpty())
+	{
+		return;
+	}
+	referee_dma_head = (referee_dma_head + 1) % REFEREE_DMA_TX_QUEUE_DEPTH;
+	referee_dma_count--;
 }
 
 static void Referee_DMA_StartNext(void)
 {
-    if (referee_dma_busy || Referee_DMA_QueueEmpty()) {
-        return;
-    }
+	if (referee_dma_busy || Referee_DMA_QueueEmpty())
+	{
+		return;
+	}
 
-    uint16_t len = referee_dma_queue[referee_dma_head].len;
-    if (HAL_UART_Transmit_DMA(&huart10, referee_dma_queue[referee_dma_head].data, len) == HAL_OK) {
-        referee_dma_busy = 1;
-    }
+	uint16_t len = referee_dma_queue[referee_dma_head].len;
+	if (HAL_UART_Transmit_DMA(&huart10, referee_dma_queue[referee_dma_head].data, len) == HAL_OK)
+	{
+		referee_dma_busy = 1;
+	}
 }
 
 void Referee_DMA_EnqueuePacket(const uint8_t *data, uint16_t len)
 {
-    if (len == 0 || len > REFEREE_DMA_MAX_PACKET_LEN) {
-        return;
-    }
+	if (len == 0 || len > REFEREE_DMA_MAX_PACKET_LEN)
+	{
+		return;
+	}
 
-    // if (Referee_DMA_QueueFull()) {
-    //     return;
-    // }
+	// if (Referee_DMA_QueueFull()) {
+	//     return;
+	// }
 
-    memcpy(referee_dma_queue[referee_dma_tail].data, data, len);
-    referee_dma_queue[referee_dma_tail].len = len;
-    referee_dma_tail = (referee_dma_tail + 1) % REFEREE_DMA_TX_QUEUE_DEPTH;
-    referee_dma_count++;
-    Referee_DMA_StartNext();
+	memcpy(referee_dma_queue[referee_dma_tail].data, data, len);
+	referee_dma_queue[referee_dma_tail].len = len;
+	referee_dma_tail = (referee_dma_tail + 1) % REFEREE_DMA_TX_QUEUE_DEPTH;
+	referee_dma_count++;
+	Referee_DMA_StartNext();
 }
 /**********************************************************************************************************
  *函 数 名: Send_UIPack
@@ -172,18 +176,20 @@ void Send_toReferee(uint16_t cmd_id, uint16_t data_len)
 uint32_t lastcnt;
 float dtw;
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if (huart == &huart10) {
-		dtw = 1.0f/DWT_GetDeltaT(&lastcnt);
-        // referee_dma_busy = 0;
-        // Referee_DMA_Dequeue();
-        // Referee_DMA_StartNext();
-    }
-}
+	void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+	{
+		if (huart == &huart10)
+		{
+			dtw = 1.0f / DWT_GetDeltaT(&lastcnt);
+			// referee_dma_busy = 0;
+			// Referee_DMA_Dequeue();
+			// Referee_DMA_StartNext();
+		}
+	}
 
 #ifdef __cplusplus
 }
@@ -430,25 +436,25 @@ void ShootLines_Init_1(void)
 	uint16_t x_bias = 0;
 	uint16_t y_bias = 0;
 	// 左侧纵向虚线
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 135 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 135 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName1);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 135 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 135 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName1);
 	memcpy(data_pack, (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 120 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 120 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName2);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 120 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 120 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName2);
 	memcpy(&data_pack[DRAWING_PACK], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 105 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 105 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName3);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 105 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 105 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName3);
 	memcpy(&data_pack[DRAWING_PACK * 2], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 90 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 90 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName4);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 90 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 90 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName4);
 	memcpy(&data_pack[DRAWING_PACK * 3], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 75 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 75 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName5);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 75 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 75 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName5);
 	memcpy(&data_pack[DRAWING_PACK * 4], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 60 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 60 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName6);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 60 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 60 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName6);
 	memcpy(&data_pack[DRAWING_PACK * 5], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 45 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 45 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName7);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 45 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 45 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName7);
 	memcpy(&data_pack[DRAWING_PACK * 6], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
 	Send_UIPack(Drawing_Graphic7_ID, JudgeReceiveData.robot_id, JudgeReceiveData.robot_id + 0x100, data_pack, DRAWING_PACK * 7); // 发送七个图形
@@ -467,25 +473,25 @@ void ShootLines_Init_2(void)
 	uint16_t x_bias = 0;
 	uint16_t y_bias = 0;
 	// 右侧纵向虚线
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 135 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 135 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName1);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 135 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 135 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName1);
 	memcpy(data_pack, (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 120 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 120 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName2);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 120 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 120 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName2);
 	memcpy(&data_pack[DRAWING_PACK], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 105 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 105 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName3);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 105 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 105 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName3);
 	memcpy(&data_pack[DRAWING_PACK * 2], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 90 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 90 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName4);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 90 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 90 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName4);
 	memcpy(&data_pack[DRAWING_PACK * 3], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 75 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 75 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName5);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 75 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 75 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName5);
 	memcpy(&data_pack[DRAWING_PACK * 4], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 60 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 60 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName6);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 60 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 60 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName6);
 	memcpy(&data_pack[DRAWING_PACK * 5], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 45 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 45 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, White, ShootLineName7);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 45 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 45 + x_bias, SCREEN_WIDTH * 0.5 - 10 + y_bias, 1, Red_Blue, ShootLineName7);
 	memcpy(&data_pack[DRAWING_PACK * 6], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
 	Send_UIPack(Drawing_Graphic7_ID, JudgeReceiveData.robot_id, JudgeReceiveData.robot_id + 0x100, data_pack, DRAWING_PACK * 7); // 发送七个图形
@@ -505,25 +511,25 @@ void ShootLines_Init_3(void)
 	uint16_t y_bias = 0;
 
 	// 外侧轮廓瞄准线
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 150 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 150 + x_bias, SCREEN_WIDTH * 0.5 - 20 + y_bias, 1, White, ShootLineName1);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 150 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 150 + x_bias, SCREEN_WIDTH * 0.5 - 20 + y_bias, 1, Red_Blue, ShootLineName1);
 	memcpy(data_pack, (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 150 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 150 + x_bias, SCREEN_WIDTH * 0.5 - 20 + y_bias, 1, White, ShootLineName2);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 150 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 150 + x_bias, SCREEN_WIDTH * 0.5 - 20 + y_bias, 1, Red_Blue, ShootLineName2);
 	memcpy(&data_pack[DRAWING_PACK], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 150 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 190 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, 1, White, ShootLineName3);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 150 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 - 190 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, 1, Red_Blue, ShootLineName3);
 	memcpy(&data_pack[DRAWING_PACK * 2], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 150 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 190 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, 1, White, ShootLineName4);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + 150 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, SCREEN_LENGTH * 0.5 + 190 + x_bias, SCREEN_WIDTH * 0.5 + y_bias, 1, Red_Blue, ShootLineName4);
 	memcpy(&data_pack[DRAWING_PACK * 3], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 + 60 + y_bias, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 + 95 + y_bias, 1, White, ShootLineName5);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 + 60 + y_bias, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 + 95 + y_bias, 1, Red_Blue, ShootLineName5);
 	memcpy(&data_pack[DRAWING_PACK * 4], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 - 50 + y_bias, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 - 210 + y_bias, 1, White, ShootLineName6);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 - 50 + y_bias, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 - 210 + y_bias, 1, Red_Blue, ShootLineName6);
 	memcpy(&data_pack[DRAWING_PACK * 5], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 - 50 + y_bias, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 - 210 + y_bias, 1, White, ShootLineName7);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 - 50 + y_bias, SCREEN_LENGTH * 0.5 + x_bias, SCREEN_WIDTH * 0.5 - 210 + y_bias, 1, Red_Blue, ShootLineName7);
 	memcpy(&data_pack[DRAWING_PACK * 6], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
 	Send_UIPack(Drawing_Graphic7_ID, JudgeReceiveData.robot_id, JudgeReceiveData.robot_id + 0x100, data_pack, DRAWING_PACK * 7); // 发送七个图形
@@ -541,16 +547,16 @@ void ShootLines_Init_4(void)
 	uint16_t y_bias = 0;
 
 	// 内侧轮廓瞄准线
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 19 + x_bias, SCREEN_WIDTH * 0.5 - 82 + y_bias, SCREEN_LENGTH * 0.5 + 20 + x_bias, SCREEN_WIDTH * 0.5 - 82 + y_bias, 1, White, ShootLineName1);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 19 + x_bias, SCREEN_WIDTH * 0.5 - 82 + y_bias, SCREEN_LENGTH * 0.5 + 20 + x_bias, SCREEN_WIDTH * 0.5 - 82 + y_bias, 1, Red_Blue, ShootLineName1);
 	memcpy(data_pack, (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 39 + x_bias, SCREEN_WIDTH * 0.5 - 114 + y_bias, SCREEN_LENGTH * 0.5 + 40 + x_bias, SCREEN_WIDTH * 0.5 - 114 + y_bias, 1, White, ShootLineName2);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 39 + x_bias, SCREEN_WIDTH * 0.5 - 114 + y_bias, SCREEN_LENGTH * 0.5 + 40 + x_bias, SCREEN_WIDTH * 0.5 - 114 + y_bias, 1, Red_Blue, ShootLineName2);
 	memcpy(&data_pack[DRAWING_PACK], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 59 + x_bias, SCREEN_WIDTH * 0.5 - 146 + y_bias, SCREEN_LENGTH * 0.5 + 60 + x_bias, SCREEN_WIDTH * 0.5 - 146 + y_bias, 1, White, ShootLineName3);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 59 + x_bias, SCREEN_WIDTH * 0.5 - 146 + y_bias, SCREEN_LENGTH * 0.5 + 60 + x_bias, SCREEN_WIDTH * 0.5 - 146 + y_bias, 1, Red_Blue, ShootLineName3);
 	memcpy(&data_pack[DRAWING_PACK * 2], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
-	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 79 + x_bias, SCREEN_WIDTH * 0.5 - 178 + y_bias, SCREEN_LENGTH * 0.5 + 80 + x_bias, SCREEN_WIDTH * 0.5 - 178 + y_bias, 1, White, ShootLineName4);
+	P_graphic_data = Line_Draw(1, Op_Add, SCREEN_LENGTH * 0.5 - 79 + x_bias, SCREEN_WIDTH * 0.5 - 178 + y_bias, SCREEN_LENGTH * 0.5 + 80 + x_bias, SCREEN_WIDTH * 0.5 - 178 + y_bias, 1, Red_Blue, ShootLineName4);
 	memcpy(&data_pack[DRAWING_PACK * 3], (uint8_t *)P_graphic_data, DRAWING_PACK);
 
 	Send_UIPack(Drawing_Graphic5_ID, JudgeReceiveData.robot_id, JudgeReceiveData.robot_id + 0x100, data_pack, DRAWING_PACK * 4); // 发送四个图形
@@ -651,9 +657,9 @@ void Pitch_Line_Init_3(void)
 void GIMLine_Init(void)
 {
 	static uint8_t GIMLineName1[] = "GL1";
-	static uint8_t GIMLineName2[] = "GL2";	
-	static uint8_t GIMLineName3[] = "GL3";	
-	static uint8_t GIMLineName4[] = "GL4";		
+	static uint8_t GIMLineName2[] = "GL2";
+	static uint8_t GIMLineName3[] = "GL3";
+	static uint8_t GIMLineName4[] = "GL4";
 	graphic_data_struct_t *P_graphic_data;
 
 	uint16_t x_bias = 0;
@@ -670,7 +676,7 @@ void GIMLine_Init(void)
 	Char_Draw(1, Op_Add, 886, 270, 20, sizeof(N), 2, White, GIMLineName2, N);
 
 	Char_Draw(1, Op_Add, 952, 261, 20, sizeof(M), 2, White, GIMLineName3, M);
-	
+
 	Char_Draw(1, Op_Add, 1021, 270, 20, sizeof(F), 2, White, GIMLineName4, F);
 }
 /**********************************************************************************************************
@@ -724,7 +730,6 @@ void SCapLine_Change(void)
 
 	// 发送图形数据
 	Send_UIPack(Drawing_Graphic1_ID, JudgeReceiveData.robot_id, JudgeReceiveData.robot_id + 0x100, data_pack, DRAWING_PACK);
-
 }
 /**********************************************************************************************************
  *函 数 名: ChassisLine_Change
@@ -734,6 +739,7 @@ void SCapLine_Change(void)
  **********************************************************************************************************/
 uint16_t xxx = 632;
 uint16_t yyy = 184;
+float testtheta;
 void ChassisLine_Change(float theta, uint8_t Init_Cnt)
 {
 	static uint8_t ChassisLineName[] = "CLC";
@@ -744,13 +750,33 @@ void ChassisLine_Change(float theta, uint8_t Init_Cnt)
 	graphic_data_struct_t *P_graphic_data;
 
 	theta = (int16_t)theta % 360;
+	if (theta > 180.f)
+	{
+		theta -= 360.f;
+	}
+	else if(theta < -180.f)
+	{
+		theta += 360.f;
+	}
+
 	theta = theta - Reference_Angle;
 
+	theta = (int16_t)theta % 360;
+	if (theta > 180.f)
+	{
+		theta -= 360.f;
+	}
+	else if(theta < -180.f)
+	{
+		theta += 360.f;
+	}
+
+	testtheta = theta;
 	// 计算圆弧的起始和终止角度
 	// 随着夹角变化，圆弧整体旋转
 
-	start_angle = (uint16_t)(345 + theta) % 360;
-	end_angle = (uint16_t)(15 + theta) % 360;
+	start_angle = (uint16_t)((345 + (int16_t)theta) % 360);
+	end_angle = (uint16_t)((15 + (int16_t)theta) % 360);
 
 	// 圆弧半径
 	uint32_t radius = 83;
@@ -857,7 +883,7 @@ void BoostLine_Change(void)
 void GIMLine_Change(uint8_t Init_Cnt)
 {
 	static uint8_t GIMLineName1[] = "GL5";
-	static uint8_t optype;	
+	static uint8_t optype;
 	graphic_data_struct_t *P_graphic_data;
 
 	uint16_t x_bias = 0;
@@ -898,11 +924,11 @@ void PitchUI_Change(float Pitch, uint8_t Init_Cnt)
 	static uint8_t optype;
 	graphic_data_struct_t *P_graphic_data;
 
-	float pitchMin = -40.0f;
-	float pitchMax = 40.0f;
+	float pitchMin = -17.0f;
+	float pitchMax = 30.0f;
 
-	uint16_t bgStartAngle = 40;
-	uint16_t bgEndAngle = 140;
+	uint16_t bgStartAngle = 50;
+	uint16_t bgEndAngle = 130;
 
 	// 计算当前Pitch对应的角度位置
 	float pitchRatio = (Pitch - pitchMin) / (pitchMax - pitchMin);		 // 归一化到0-1范围
@@ -927,7 +953,7 @@ void PitchUI_Change(float Pitch, uint8_t Init_Cnt)
  *形    参: 无
  *返 回 值: 无
  **********************************************************************************************************/
-uint16_t ababa =0;
+uint16_t ababa = 0;
 void Scap_Change(float Scap_Percentage, uint8_t Init_Cnt)
 {
 	static uint8_t ScapLineName[] = "SCP";
@@ -941,7 +967,7 @@ void Scap_Change(float Scap_Percentage, uint8_t Init_Cnt)
 	uint32_t radius = 300;
 
 	// 计算圆弧的起始和终止角度
-	uint16_t startAngle = 270; 
+	uint16_t startAngle = 270;
 	uint16_t endAngle = (uint16_t)(startAngle + (Scap_Percentage / 100.0f) * 40); // 根据百分比计算结束角度
 	ababa = endAngle;
 
@@ -968,7 +994,7 @@ static uint32_t ui_update_counter = 0;
 // 添加状态变化标志
 static uint8_t status_changed = 0;
 
-uint32_t last_update_time_value = 0;			   // 上次数值更新时间
+uint32_t last_update_time_value = 0; // 上次数值更新时间
 
 // 添加UI更新状态枚举
 typedef enum
@@ -982,11 +1008,11 @@ uint16_t ssm = 0;
 UI_Update_State_t ui_state = UI_STATE_IDLE; // UI更新状态
 void GraphicSendtask(void)
 {
-	//static UI_Update_State_t ui_state = UI_STATE_IDLE; // UI更新状态
-	static uint8_t status_update_retry = 0;			   // 状态更新重试次数
-	static uint8_t last_status_type = 0;			   // 上次变化的状态类型
-	static uint32_t last_update_time = 0;			   // 上次更新时间
-	static uint32_t current_time = 0;				   // 当前时间
+	// static UI_Update_State_t ui_state = UI_STATE_IDLE; // UI更新状态
+	static uint8_t status_update_retry = 0; // 状态更新重试次数
+	static uint8_t last_status_type = 0;	// 上次变化的状态类型
+	static uint32_t last_update_time = 0;	// 上次更新时间
+	static uint32_t current_time = 0;		// 当前时间
 
 	// 获取当前时间
 	current_time = DWT_GetTimeline_ms();
@@ -1001,7 +1027,7 @@ void GraphicSendtask(void)
 	if (Init_Cnt > 0)
 	{
 		Init_Cnt--;
-		if(Init_Cnt == 254)
+		if (Init_Cnt == 254)
 		{
 			referee_dma_busy = 0;
 			referee_dma_count = 0;
@@ -1018,7 +1044,7 @@ void GraphicSendtask(void)
 		}
 		else
 		{
-			ShootLines_Init_1();			 // 枪口线
+			ShootLines_Init_1(); // 枪口线
 			ShootLines_Init_2();
 			ShootLines_Init_3();
 			ShootLines_Init_4();
@@ -1035,7 +1061,7 @@ void GraphicSendtask(void)
 
 		return;
 	}
-	
+
 	// 状态机处理
 	switch (ui_state)
 	{
@@ -1136,5 +1162,5 @@ void GraphicSendtask(void)
 		ui_state = UI_STATE_IDLE;
 		last_update_time = current_time;
 		break;
-	}	
+	}
 }

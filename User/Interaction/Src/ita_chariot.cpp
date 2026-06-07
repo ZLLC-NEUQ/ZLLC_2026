@@ -106,11 +106,9 @@ void Class_Chariot::CAN_Chassis_Tx_Gimbal_Callback()
 {
     uint16_t Shooter_Barrel_Heat;
     uint16_t Shooter_Barrel_Heat_Limit;
-    uint16_t Shooter_Speed;
     uint16_t Shooter_Cool;
     Shooter_Barrel_Heat_Limit = Referee.Get_Booster_17mm_1_Heat_Max();
     Shooter_Barrel_Heat = Referee.Get_Booster_17mm_1_Heat();
-    Shooter_Speed = uint16_t(Referee.Get_Shoot_Speed() * 10);
     Shooter_Cool = Referee.Get_Booster_17mm_1_Heat_CD();
     // 发送数据给云台
     CAN2_Chassis_Tx_Gimbal_Data[0] = Referee.Get_ID();
@@ -122,8 +120,9 @@ void Class_Chariot::CAN_Chassis_Tx_Gimbal_Callback()
 }
 void Class_Chariot::CAN_Chassis_Tx_Gimbal_Callback_1()
 {
-    memcpy(CAN2_Chassis_Tx_Gimbal_Data_1, &wwx, sizeof(float));
-    memcpy(CAN2_Chassis_Tx_Gimbal_Data_1 + 4, &wwy, sizeof(float));
+    uint16_t Shooter_Speed; 
+    Shooter_Speed = uint16_t(Referee.Get_Shoot_Speed() * 10);
+    memcpy(CAN2_Chassis_Tx_Gimbal_Data_1, &Shooter_Speed, sizeof(uint16_t));
 }
 #endif
 
@@ -248,14 +247,11 @@ void Class_Chariot::CAN_Gimbal_Rx_Chassis_Callback()
     Enum_Referee_Game_Status_Stage game_stage;
     uint16_t Shooter_Barrel_Heat;
     
-    uint16_t tmp_shooter_speed;
-    float Shooter_Speed;
     robo_id = (Enum_Referee_Data_Robots_ID)CAN_Manage_Object->Rx_Buffer.Data[0];
     game_stage = (Enum_Referee_Game_Status_Stage)CAN_Manage_Object->Rx_Buffer.Data[1];
     memcpy(&Shooter_Barrel_Heat_Limit, CAN_Manage_Object->Rx_Buffer.Data + 2, sizeof(uint16_t));
     memcpy(&Shooter_Barrel_Cooling_Value, CAN_Manage_Object->Rx_Buffer.Data + 4, sizeof(uint16_t));
     memcpy(&Shooter_Barrel_Heat, CAN_Manage_Object->Rx_Buffer.Data + 6, sizeof(uint16_t));
-    Shooter_Speed = tmp_shooter_speed / 10.0f;
     Referee.Set_Robot_ID(robo_id);
     Referee.Set_Booster_17mm_1_Heat_Max(Shooter_Barrel_Heat_Limit);
     Referee.Set_Game_Stage(game_stage);
@@ -264,11 +260,12 @@ void Class_Chariot::CAN_Gimbal_Rx_Chassis_Callback()
 }
 void Class_Chariot::CAN_Gimbal_Rx_Chassis_Callback_1()
 {
-    // memcpy(&tmp_heat, &CAN_Manage_Object->Rx_Buffer.Data[0], sizeof(uint16_t));
-    // Referee.Set_Booster_17mm_1_Heat(tmp_heat);
-    // // Booster.set_heat(tmp_heat);
-    memcpy(&wwx, &CAN_Manage_Object->Rx_Buffer.Data[0], sizeof(float));
-    memcpy(&wwy, &CAN_Manage_Object->Rx_Buffer.Data[4], sizeof(float));
+    uint16_t tmp_shooter_speed;
+    float Shooter_Speed;
+    memcpy(&tmp_shooter_speed, CAN_Manage_Object->Rx_Buffer.Data, sizeof(uint16_t));
+    Shooter_Speed = tmp_shooter_speed / 10.0f;
+    Referee.Set_Booster_Speed(Shooter_Speed);
+
 }
 #endif
 
@@ -413,8 +410,7 @@ void Class_Chariot::Control_Chassis()
         // 键盘遥控器操作逻辑
         if (VT13.Get_Switch() == VT13_Switch_Status_Left)
         {
-            Chassis.Set_Chassis_Control_Type(Chassis_Control_Type_SPIN_Positive);
-            chassis_omega = -Chassis.Get_Spin_Omega();
+            Chassis.Set_Chassis_Control_Type(Chassis_Control_Type_DISABLE);
         }
         if (VT13.Get_Switch() == VT13_Switch_Status_Middle)
         {
@@ -982,31 +978,41 @@ void Class_Chariot::Control_Booster()
         if (Fric_Status == Fric_Status_OPEN)
         {
             static uint16_t limi = 0;
-            if(Gimbal.Get_Gimbal_Control_Type() == Gimbal_Control_Type_MINIPC){
-            if(MiniPC.Get_Fire_Status() == 1 && MiniPC.Get_MiniPC_Status() == MiniPC_Data_Status_ENABLE){
-                // limi ++;
-                // if(limi = 3){
-                     Booster.Set_Booster_Control_Type(Booster_Control_Type_SINGLE);
-                    //Booster.Set_Booster_Control_Type(Booster_Control_Type_CEASEFIRE);
-                    limi = 0;
-                // }
-            }
-        }
-            else{
-            if (VT13.Get_Yaw() > -0.2f && VT13.Get_Yaw() < 0.2f)
+            if (Gimbal.Get_Gimbal_Control_Type() == Gimbal_Control_Type_MINIPC)
             {
-                Booster.Set_Booster_Control_Type(Booster_Control_Type_CEASEFIRE);
-                Shoot_Flag = 0;
+                if(MiniPC.Get_Fire_Status() == 1 && MiniPC.Get_MiniPC_Status() == MiniPC_Data_Status_ENABLE){
+                if (VT13.Get_Yaw() > -0.2f && VT13.Get_Yaw() < 0.2f)
+                {
+                    Booster.Set_Booster_Control_Type(Booster_Control_Type_CEASEFIRE);
+                    Shoot_Flag = 0;
+                }
+                if (VT13.Get_Yaw() < -0.8f && Shoot_Flag == 0) // 单发
+                {
+                    Booster.Set_Booster_Control_Type(Booster_Control_Type_SINGLE);
+                    Shoot_Flag = 1;
+                }
+                if (VT13.Get_Yaw() > 0.8f && Shoot_Flag == 0) // 五连发
+                {
+                    Booster.Set_Booster_Control_Type(Booster_Control_Type_REPEATED);
+                }
+                }
             }
-            if (VT13.Get_Yaw() < -0.8f && Shoot_Flag == 0) // 单发
+            else
             {
-                Booster.Set_Booster_Control_Type(Booster_Control_Type_SINGLE);
-                Shoot_Flag = 1;
-            }
-            if (VT13.Get_Yaw() > 0.8f && Shoot_Flag == 0) // 五连发
-            {
-                Booster.Set_Booster_Control_Type(Booster_Control_Type_REPEATED);
-            }
+                if (VT13.Get_Yaw() > -0.2f && VT13.Get_Yaw() < 0.2f)
+                {
+                    Booster.Set_Booster_Control_Type(Booster_Control_Type_CEASEFIRE);
+                    Shoot_Flag = 0;
+                }
+                if (VT13.Get_Yaw() < -0.8f && Shoot_Flag == 0) // 单发
+                {
+                    Booster.Set_Booster_Control_Type(Booster_Control_Type_SINGLE);
+                    Shoot_Flag = 1;
+                }
+                if (VT13.Get_Yaw() > 0.8f && Shoot_Flag == 0) // 五连发
+                {
+                    Booster.Set_Booster_Control_Type(Booster_Control_Type_REPEATED);
+                }
             }
         }
     }
@@ -1126,11 +1132,11 @@ void Class_Chariot::Control_Booster()
                 Booster.Set_Booster_Control_Type(Booster_Control_Type_CEASEFIRE);
             }
 
-            if (Gimbal.Get_Gimbal_Control_Type() == Gimbal_Control_type_FOLD)
-            {
-                Booster.Set_Friction_Control_Type(Friction_Control_Type_DISABLE);
-                Fric_Status = Fric_Status_CLOSE;
-            }
+            // if (Gimbal.Get_Gimbal_Control_Type() == Gimbal_Control_type_FOLD)
+            // {
+            //     Booster.Set_Friction_Control_Type(Friction_Control_Type_DISABLE);
+            //     Fric_Status = Fric_Status_CLOSE;
+            // }
         }
     }
 }
@@ -1228,6 +1234,16 @@ void Class_Chariot::TIM_Calculate_PeriodElapsedCallback()
 		Chassis.Set_Target_Omega(0.0f);
 	}
 
+    // 超电控制
+    if (Sprint_Status == Sprint_Status_ENABLE)
+    {
+        Chassis.Supercap.Set_Supercap_Usage_Stratage(Supercap_Usage_Stratage_Supercap_BufferPower);
+    }
+    else
+    {
+        Chassis.Supercap.Set_Supercap_Usage_Stratage(Supercap_Usage_Stratage_Referee_BufferPower);
+    }
+    Chassis.Supercap.TIM_Supercap_PeriodElapsedCallback();
 	// Chassis.Set_Sprint_Status(Sprint_Status);		
     Chassis.TIM_Calculate_PeriodElapsedCallback(Sprint_Status);//还有飞坡前馈没写
 				

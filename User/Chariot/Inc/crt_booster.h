@@ -215,8 +215,8 @@ public:
     float Cooling_Value = 10.0f; // 裁判冷却值
 
     // 收缩参数（可调）
-    float Tau0 = 0.835f;         // 提前收缩时间
-    float Tau1 = 0.14f;          // 收缩陡度
+    float Tau0 = 0.45f;         // 提前收缩时间
+    float Tau1 = 0.0965f;          // 收缩陡度
     float Recover_Ratio = 0.85f; // 恢复比例
 
     bool Overheat_Flag = false;
@@ -242,7 +242,11 @@ public:
     inline void Set_Friction_Omega(float __Friction_Omega);
     inline void Set_Driver_Omega(float __Driver_Omega);
     inline void Set_Target_Drvier_Angle(float __Driver_Angle);
+    inline void Set_Tau0(float __Tau0);
+    inline void Set_Tau1(float __Tau1);
 
+    void Change_Shoot_Speed(float __shootspeed);
+    void Change_Shoot_Limite_Time(uint8_t __Level);
     void TIM_Calculate_PeriodElapsedCallback();
     void Output();
 
@@ -277,7 +281,7 @@ protected:
     Enum_Booster_Control_Type Booster_Control_Type = Booster_Control_Type_DISABLE;
     Enum_Friction_Control_Type Friction_Control_Type = Friction_Control_Type_DISABLE;
     // 摩擦轮角速度
-    float Friction_Omega = 1050.0f;
+    float Friction_Omega = 1000.0f;
     float Target_Bullet_Speed = 23.5f;
     // 拨弹盘实际的目标速度
     float Driver_Omega = 2.0f * PI * 2.5f ;
@@ -385,6 +389,24 @@ void Class_Booster::Set_Friction_Omega(float __Friction_Omega)
 void Class_Booster::Set_Driver_Omega(float __Driver_Omega)
 {
     Driver_Omega = __Driver_Omega;
+}
+
+/**
+ * @brief 设定时间常量T0
+ * 
+ */
+void Class_Booster::Set_Tau0(float __Tau0)
+{
+    Tau0 == __Tau0;
+}
+
+/**
+ * @brief 设定时间常量T1
+ * 
+ */
+void Class_Booster::Set_Tau1(float __Tau1)
+{
+    Tau1 == __Tau1;
 }
 
 #endif

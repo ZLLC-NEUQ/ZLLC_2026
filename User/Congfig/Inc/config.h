@@ -21,7 +21,7 @@
 #define GIMBAL
 
 //底盘标定参考正方向角度(数据来源yaw电机)
-#define Reference_Angle  75.07f
+#define Reference_Angle  -52.29f
 #define Reference_Radian  (Reference_Angle * PI / 180.f)
 
 //调试或比赛状态
@@ -38,6 +38,7 @@
 #define Heat_Detect_ENABLE
 //#define Heat_Detect_DISABLE
 
+#define Forward_Power
 
 #define SuperCap 0
 

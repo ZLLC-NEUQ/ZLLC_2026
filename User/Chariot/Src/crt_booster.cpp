@@ -396,10 +396,10 @@ void Class_Booster::Output()
         float S = 1.0f / (1.0f + exp((τ - Tau0) / Tau1));
 
         // ---------- 平衡频率 ----------
-        Balance_Frequency = Cooling_Value / 10.0f * 0.85f;
+        Balance_Frequency = Cooling_Value / 10.0f * 0.55f;
 
         // ---------- 目标角速度 ----------
-        float omega_balance = Balance_Frequency * (2.5f * 2.0f * PI / 9.0f);
+        float omega_balance = Balance_Frequency * (2.0f * 2.0f * PI / 9.0f);
         float omega_max = Base_Frequency * (2.5f * 2.0f * PI / 9.0f);
 
         float target_omega = omega_max - (omega_max - omega_balance) * S;
@@ -439,6 +439,79 @@ void Class_Booster::Output()
     }
 	
 }
+
+/**
+ * @brief 根据弹速改变摩擦轮转速
+ * 
+ * @param __shootspeed 
+ */
+void Class_Booster::Change_Shoot_Speed(float __shootspeed)
+{
+    if (__shootspeed > 24.5f)
+    {
+        Friction_Omega -= 10.0f;
+    }
+    else if(Friction_Omega < 23.f)
+    {
+        Friction_Omega += 10.0f;
+    }
+    
+}
+
+/**
+ * @brief 根据机器人等级实施更改热量限制参数
+ *
+ * @param __Level
+ */
+void Class_Booster::Change_Shoot_Limite_Time(uint8_t __Level)
+{
+    switch (__Level)
+    {
+    case 1:
+        Set_Tau0(0.5f);
+        Set_Tau1(0.1f);
+        break;
+    case 2:
+        Set_Tau0(0.5f);
+        Set_Tau1(0.1f);
+        break;
+    case 3:
+        Set_Tau0(0.5f);
+        Set_Tau1(0.1f);
+        break;
+    case 4:
+        Set_Tau0(0.5f);
+        Set_Tau1(0.1f);
+        break;
+    case 5:
+        Set_Tau0(0.5f);
+        Set_Tau1(0.1f);
+        break;
+    case 6:
+        Set_Tau0(0.5f);
+        Set_Tau1(0.1f);
+        break;
+    case 7:
+        Set_Tau0(0.5f);
+        Set_Tau1(0.1f);
+        break;
+    case 8:
+        Set_Tau0(0.5f);
+        Set_Tau1(0.1f);
+        break;
+    case 9:
+        Set_Tau0(0.5f);
+        Set_Tau1(0.1f);
+        break;
+    case 10:
+        Set_Tau0(0.5f);
+        Set_Tau1(0.1f);
+        break;
+    
+    default:
+        break;
+    }
+}
 /**
  * @brief 定时器计算函数
  *
@@ -464,11 +537,16 @@ void Class_Booster::TIM_Calculate_PeriodElapsedCallback()
     // Heat_Max = Referee->Get_Booster_17mm_1_Heat_Max();
     // Cooling_Value = Referee->Get_Booster_17mm_1_Heat_CD();
 
-    //Heat_Max = Referee->Get_Booster_17mm_1_Heat_Max();
-    Heat_Max = smax;
-    Heat_Local = Referee->Get_Booster_17mm_1_Heat();
-    // Cooling_Value = Referee->Get_Booster_17mm_1_Heat_CD();
-    Cooling_Value = cools;
+    //if (Referee->Get_Referee_Status() == Referee_Status_ENABLE)
+    //{
+        //Change_Shoot_Speed(Referee->Get_Shoot_Speed());
+        //Change_Shoot_Limite_Time(Referee->Get_Level());
+        Heat_Max = Referee->Get_Booster_17mm_1_Heat_Max();
+        //Heat_Max = smax;
+        Heat_Local = Referee->Get_Booster_17mm_1_Heat();
+        Cooling_Value = Referee->Get_Booster_17mm_1_Heat_CD();
+        //Cooling_Value = cools;
+    //}
     FSM_Heat_Detect.Reload_TIM_Status_PeriodElapsedCallback();
     //卡弹处理
     FSM_Antijamming.Reload_TIM_Status_PeriodElapsedCallback();

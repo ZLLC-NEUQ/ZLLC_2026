@@ -33,6 +33,7 @@ class Class_Chariot;
 extern uint16_t gimbal_lock;
 extern uint16_t run_time;
 extern bool Reset_Pitch_2;
+extern float reference_angle;
 /* Exported types ------------------------------------------------------------*/
 
 /**

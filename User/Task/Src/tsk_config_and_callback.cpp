@@ -46,6 +46,7 @@
 #include "config.h"
 #include "dvc_GraphicsSendTask.h"
 #include "buzzer.h"
+#include "arm_math.h"
 /* Private macros ------------------------------------------------------------*/
 
 /* Private types -------------------------------------------------------------*/
@@ -633,7 +634,7 @@ extern "C" void Task_Init()
         JudgeReceiveData.robot_id = chariot.Referee.Get_ID();
         JudgeReceiveData.Chassis_Control_Type = chariot.Chassis.Get_Chassis_Control_Type();
         JudgeReceiveData.Pitch_Angle = chariot.Gimbal_Tx_Pitch_Angle; // pitch角度
-        JudgeReceiveData.Supercap_Voltage = chariot.Chassis.Supercap.Get_Supercap_Proportion(); // 超电电压百分比
+        JudgeReceiveData.Supercap_Voltage = chariot.Chassis.Supercap.Get_Supercap_Charge_Percentage(); // 超电电压百分比
         JudgeReceiveData.Chassis_Gimbal_Diff = chariot.Motor_Yaw.Get_Now_Angle(); // 底盘角度    
 
         if (chariot.Referee_UI_Refresh_Status == Referee_UI_Refresh_Status_ENABLE)

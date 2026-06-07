@@ -736,7 +736,7 @@ void Class_Steering_Wheel_Chassis::Force_Speed_Resolution()
  */
 uint32_t _cntm = 0;
 float aaa = 0;
-float Max_Power_test = 70.0f;
+float Max_Power_test = 60.0f;
 float Chassis_Buffer = 0.0;
 float a,b,c;
 void Class_Steering_Wheel_Chassis::TIM_Calculate_PeriodElapsedCallback(Enum_Sprint_Status __Sprint_Status)
@@ -763,36 +763,20 @@ void Class_Steering_Wheel_Chassis::TIM_Calculate_PeriodElapsedCallback(Enum_Spri
     /***************************超级电容*********************************/
 #ifdef POWER_LIMIT_JH
     static uint8_t supercap_flag = 0;                   //超电能量低于50J的标志位
-    
+
     //计算限制功率
     if (Referee->Get_Referee_Status() == Referee_Status_ENABLE)
     {
-        // 缓冲环限制功率
-        Power_Management.Buffer_Power = 0.0f;    //Referee->Get_Chassis_Energy_Buffer() - 30.0f; 
-        // Power_Management.Buffer_Power = (Referee->Get_Chassis_Energy_Buffer() - 30.0f) * 1.5f;
-        Math_Constrain(&Power_Management.Buffer_Power, -50.0f, 30.0f);
 
-        if (Supercap.Get_Supercap_Status() != Supercap_Status_DISABLE && __Sprint_Status == Sprint_Status_ENABLE)
-        {
-            Power_Management.Max_Power = Supercap.Get_Buffer_Power() * 0.9f + Power_Management.Buffer_Power + Referee->Get_Chassis_Power_Max();
-            if(Supercap.Get_Buffer_Power() <= 60.f)
-            {
-                Power_Management.Max_Power = Referee->Get_Chassis_Power_Max(); 
-            }
-        }
-        else
-        {
-            // Power_Management.Max_Power = Power_Management.Buffer_Power + Referee->Get_Chassis_Power_Max();
-            supercap_flag = 0;
-            Power_Management.Max_Power = Referee->Get_Chassis_Power_Max();              //不吃缓冲能量
-        }
+        Power_Management.Max_Power = Supercap.Get_Chassis_Device_LimitPower();
     }
-    else{
+    else
+    {
         //裁判系统离线限制功率
-        Power_Management.Max_Power = Max_Power_test;
-        Chassis_Buffer = 0.0f;
-    }
+        //Power_Management.Max_Power = 60.f;
 
+    }
+    
     #ifdef AGV
     for (int i = 0; i < 4; i++)         //数据传递处理
     {
@@ -820,19 +804,6 @@ void Class_Steering_Wheel_Chassis::TIM_Calculate_PeriodElapsedCallback(Enum_Spri
         //Motor_Steer[i].Output();
     }
 
-    // if(Referee->Get_Referee_Status() == Referee_Status_ENABLE){
-    //     Supercap.Set_Limit_Power(Referee->Get_Chassis_Power_Max() + Power_Management.Buffer_Power);
-    // }
-    // else{
-    //     Supercap.Set_Limit_Power(90.0f);
-    // }
-
-    Supercap.Set_Supercap_Mode(Supercap_ENABLE);
-    //Supercap.Set_Limit_Power(Power_Management.Max_Power);               //这样子是优先使用的缓冲功率
-    Supercap.Set_Limit_Power((float)Referee->Get_Chassis_Power_Max());
-    Supercap.Set_Referee_Limit_Power((uint8_t)Referee->Get_Chassis_Power_Max());
-    Supercap.Set_Referee_Buffer_Power(Referee->Get_Chassis_Energy_Buffer());
-    Supercap.TIM_Supercap_PeriodElapsedCallback();          //向超电发送信息
     #endif
     if (Get_Chassis_Control_Type() == Chassis_Control_Type_DISABLE)
     {
